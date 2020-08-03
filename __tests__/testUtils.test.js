@@ -3,11 +3,11 @@ import MetronomeEditor from '../public/js/MetronomeEditor';
 import VisSettings from '../__mocks__/visualization';
 
 describe("Testing util function", () => {
+    const theEditor = new MetronomeEditor('res/audio/',
+        [ 'Low_Bongo.wav', 'Clap_bright.wav',],
+        VisSettings);
     test("testing add compas", () => {
         // actual test
-        const theEditor = new MetronomeEditor('res/audio/',
-            [ 'Low_Bongo.wav', 'Clap_bright.wav',],
-            VisSettings);
         
         // <span id="add_0" class="badge badge-info">+</span>
         // let addFromCompas1 = '<button id="add_1" class="btn-info">+ compas</button>';
@@ -35,12 +35,12 @@ describe("Testing util function", () => {
         iBtn = theEditor.CreateAddCompasBtn('0');
         theEditor.addCompas(iBtn);
 
-        // the "id" of each compas should be from 1 to N.
-        for (let idx = 0; idx < theEditor.getDatas().length; idx++ ) {
-            let item = theEditor.getDatas()[idx];
+        // the "id" of each compas should be from 0 to N.
+        for (let idx = 0; idx < theEditor.getDatas().length; ++idx ) {
+            let item = theEditor.getDataByIdx(idx);
             let idxStr = idx.toString();
             console.log('idxStr: ', idxStr, ', item: ', item);
-            expect(idxStr).toEqual(item['no']);
+            expect(idxStr).toEqual(item['no'].toString());
         }
     });
 

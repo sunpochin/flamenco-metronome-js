@@ -19,7 +19,10 @@ export default class MetronomeEditor {
         let _datas = [];
         self.setDatas = function(datas) { _datas = datas; }
         self.getDatas = function() { return _datas; }
-        self.pushDatas = function(aCompas) { _datas.push(aCompas); }
+        self.getDataByIdx = function(idx) { return _datas[idx]; }
+        self.insertDatas = function(idx, aCompas) { 
+            _datas.splice(idx, 0, aCompas); 
+        }
 
         self.visSettings = visSettings;
         self.soundSelectId = soundSelectId || 'soundSelect';
@@ -47,8 +50,8 @@ export default class MetronomeEditor {
         CompasPattern.append(`<option>AsPalo</option>`);
         CompasPattern.append(`<option>OnBeat</option>`);
 
-        console.log('cnt: ', this.datas.length)
-        for (let element of this.datas) {
+        console.log('cnt: ', this._datas.length)
+        for (let element of this._datas) {
             const soundSelect = $('#' + this.soundSelectId + element["no"]);
             console.log('soundSelect: ', soundSelect);
             // for (const name of sounds) {
@@ -66,51 +69,17 @@ export default class MetronomeEditor {
             return fetch("res/compas-table.json")
             .then(response => response.json())
             .then(json => {
-                this.datas = json;
+                self.setDatas(json);
                 // console.log('json: ', json)
                 // console.log('this.datas: ', this.datas)
-                this.tableCreate();
-
                 this.addHeader();
-                this.rowsCreate2(this.datas);
+                this.rowsCreate2(self.getDatas() );
             });
         }
         await getJson();
-
         this.SetupSelection();
     }
 
-    // https://stackoverflow.com/questions/14643617/create-table-using-javascript
-    // https://www.valentinog.com/blog/html-table/
-    generateTableHead(table, data) {
-        let thead = table.createTHead();
-        let row = thead.insertRow();
-        for (let key of data) {
-            let th = document.createElement("th");
-            let text = document.createTextNode(key);
-            th.appendChild(text);
-            row.appendChild(th);
-        }
-    }
-    
-    generateTable(table, data) {
-        for (let element of data) {
-            let row = table.insertRow();
-            for (let key in element) {
-                let cell = row.insertCell();
-                let text = document.createTextNode(element[key]);
-                cell.appendChild(text);
-            }
-        }
-    }
-    
-    tableCreate() {
-        console.log('this.datas: ', this.datas)
-        let table = document.querySelector("table");
-        let data = Object.keys(this.datas[0]);
-        this.generateTableHead(table, data);
-        this.generateTable(table, this.datas);
-    }
 
     AddToRow(iEle, iRow) {
         iEle.className = "badge badge-info";
@@ -120,6 +89,7 @@ export default class MetronomeEditor {
         iRow.appendChild(iCol);
     }
 
+    // adding the header
     addHeader() {
         // adding compas sheet
         var myParent = document.body;
@@ -142,15 +112,14 @@ export default class MetronomeEditor {
         iEle.addEventListener("change", function() {
             self.setSound(this.selectedIndex + 1);
         });
-    
 //        iEle.setAttribute('style', 'height:40px; width:180px');
         this.AddToRow(iEle, iRow);
 
-        // compas pattern
+        // Palo
         iEle = document.createElement('span');
         colID = "add_0" ;
         iEle.setAttribute("id", colID);
-        iEle.textContent = "Compas Pattern"
+        iEle.textContent = "Palo"
         this.AddToRow(iEle, iRow);
 
         // Speed
@@ -160,11 +129,11 @@ export default class MetronomeEditor {
         iEle.textContent = "Speed"
         this.AddToRow(iEle, iRow);
 
-        // Speed type
+        // Subida
         iEle = document.createElement('span');
         colID = "speedtype_0" ;
         iEle.setAttribute("id", colID);
-        iEle.textContent = "Speed type"
+        iEle.textContent = "Subida"
         this.AddToRow(iEle, iRow);
 
         // add compas
@@ -209,7 +178,7 @@ export default class MetronomeEditor {
         var arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
         var arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
         for (let element of this.getDatas() ) {
-//            console.log('element: ', element);
+            console.log('element: ', element);
             var iRow, iNo, iCol, iBtn;
             var colID = "", iSelect = "", option = "";
             // adding row.
@@ -287,6 +256,8 @@ export default class MetronomeEditor {
             // create + compas btn.
             let rowIdx = element["no"];
             iBtn = this.CreateAddCompasBtn(rowIdx);
+            iCol = document.createElement('div');
+            iCol.className = "col-md-2";
             iCol.appendChild(iBtn);
             iRow.appendChild(iCol);
             iCompasSheet.appendChild(iRow);
@@ -303,8 +274,6 @@ export default class MetronomeEditor {
         iBtn.addEventListener("click", function() {
             self.addCompas(this);
         });
-        let iCol = document.createElement('div');
-        iCol.className = "col-md-2";
 //            iBtn.setAttribute("class", "form-control");
         return iBtn;
     }
@@ -329,18 +298,24 @@ export default class MetronomeEditor {
 //        console.log('addCompas element: ', element);
         const toStr = (element.id).toString();
 
-        const compasIdx = toStr.replace('add_', '');
+        const compasIdx = parseInt(toStr.replace('add_', '') );
         console.log('addCompas, compasNo: ', element.id, 
             ', toStr: ', toStr, ', compasIdx: ', compasIdx);
         let aJson = {
             "CompasPattern": "Alegrias", 
             "Speed": 300, 
-            "Speed Type": "Constant"
+            "Subida": "Constant"
         };
         aJson['no'] = compasIdx;
     
-        this.pushDatas(aJson);
-        this.rowsCreate2(this.getDatas() );
+        self.insertDatas(compasIdx, aJson);
+        for (let idx = compasIdx + 1; idx < self.getDatas().length; idx++ ) {
+            console.log('idx: ', idx, ', self.getDataByIdx(idx): ', 
+                self.getDataByIdx(idx) );
+            let oldNo = parseInt(self.getDataByIdx(idx)['no'], 10);
+            self.getDataByIdx(idx)['no'] = oldNo + 1;
+        }
+        self.rowsCreate2(this.getDatas() );
     }
 
     /**

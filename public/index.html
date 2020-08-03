@@ -16,12 +16,11 @@
         metronomePlayer.setAudioContext(new (window.AudioContext || window.webkitAudioContext)() );
     
     </script>
-        
-
 </head>
 
 <body>
 
+    
 <div class="container">
     <h1>Flamenco Metronome</h1>
     <div class="row">
@@ -58,12 +57,24 @@
         </div>
     </div>
     <div class="row" height="800px">
-        拱爸圖
+        Compas sheet.
         <!-- <div class="col-sm" height="800px">
             <div id='visualization' style="height: 800px;"></div>
             </div>
         </div> -->
     </div>
+
+    <table id="compas-table" class="table table-dark table-bordered">
+        <!-- <colgroup>
+            <col style="background-color: #0f0">
+            <col span="2">
+        </colgroup> -->
+        <rowgroup>
+            <row style="background-color: #f00">
+            <row span="1">
+        </rowgroup>
+    </table>
+    
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.js"></script>

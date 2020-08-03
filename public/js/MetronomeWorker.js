@@ -15,8 +15,6 @@ var compasTempoMap = new Map([
     [13, 120], [15, 120], [17, 120],
     [29, 140], [30, 160], [31, 180], [32, 200],
     [33, 200],
-
-
 ] );
 
 export default class MetronomeCore {
@@ -30,8 +28,8 @@ export default class MetronomeCore {
         this.sounds = sounds;
         // this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         // const urls = sounds.map(name => this.soundsPath + name);
-        // this.soundFiles = new SoundFiles(this.audioContext, urls);
-        this.compasNo = 0;
+        // this.soundFiles = new AudioFiles(this.audioContext, urls);
+        this.compasNo = 1;
     }
 
     /**
@@ -46,7 +44,7 @@ export default class MetronomeCore {
     setAudioContext(audioContext) {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const urls = this.sounds.map(name => this.soundsPath + name);
-        this.soundFiles = new SoundFiles(this.audioContext, urls);
+        this.soundFiles = new AudioFiles(this.audioContext, urls);
     }
 
     /**
@@ -60,67 +58,72 @@ export default class MetronomeCore {
         this.paloType = paloType;
     }
 
+    updateCompasIndicator() {
+        let compasTable = document.getElementById('compas-table');
+        console.log('updateCompasIndicator: ', this.compasNo, ', compasTable: ', compasTable);
+        let cell = compasTable.rows[this.compasNo].cells[0];
+        cell.innerHTML = "==>";
+    }
+
     playMetronome() {
-        const ms = this;
-        let counter = 0;
+        const self = this;
+        let beatCounter = 0;    //
+        self.updateCompasIndicator();
+
         // An array to represent the beating pattern of different palos.
         var beatPattern = beatAlegriasTraditional;
 
-        let nextStart = ms.audioContext.currentTime;
+        let nextStart = self.audioContext.currentTime;
         function schedule() {
-//            const speed = compasTempoMap[ms.compasNo];
-            const speed = compasTempoMap.get( ms.compasNo );
-//            const speed = compasTempoMap.get( 7 );
-            console.log('typeof', typeof(ms.compasNo), ' ,compas no: ', ms.compasNo, ', speed: ', speed);
-
-            console.log('speed: ', speed)
+            const speed = compasTempoMap.get( self.compasNo );
+            // console.log('typeof', typeof(self.compasNo), ' ,compas no: ', self.compasNo, ', speed: ', speed);
+            // console.log('speed: ', speed)
             if (undefined !== speed ) {
                 // change speed only when it's a valid Map.get() result.
-                ms.tempoBpm = speed;
+                self.tempoBpm = speed;
             }
-            console.log('ms.compasNo', ms.compasNo, ' ,speed: ', speed, ' ,ms.tempoBpm: ', ms.tempoBpm);
-
-            if (!ms.running) {
+            // console.log('self.compasNo', self.compasNo, ' ,speed: ', speed, ' ,self.tempoBpm: ', self.tempoBpm);
+            if (!self.running) {
                 return;
             }
 
-            ms.listener.setStartTime(nextStart);
-            ms.listener.setTempo(ms.tempoBpm);
+            self.listener.setStartTime(nextStart);
+            self.listener.setTempo(self.tempoBpm);
             let bufIndex = 1; // non-heavy beat sound.
-            if (bufIndex >= ms.soundFiles.buffers.length) {
+            if (bufIndex >= self.soundFiles.buffers.length) {
                 alert('Sound files are not yet loaded')
-            } else if (ms.tempoBpm) {
-                counter++;
+            } else if (self.tempoBpm) {
+                beatCounter++;
                 // change compas
-                if (beatPattern.length == counter) {
-                    counter = counter % beatPattern.length;
-                    ms.compasNo += 1;
+                if (beatPattern.length == beatCounter) {
+                    beatCounter = beatCounter % beatPattern.length;
+                    self.compasNo += 1;
+                    self.updateCompasIndicator();
                 }
-
-                // if (counter == 2 || counter == 5 || counter == 8 
-                //     || 11 == counter || 14 == counter
-                //     // || 0 == counter
+                // if (beatCounter == 2 || beatCounter == 5 || beatCounter == 8 
+                //     || 11 == beatCounter || 14 == beatCounter
+                //     // || 0 == beatCounter
                 // //     ) {
-                //     // if (counter == 1 || counter == 4 || counter == 7 
-                //     //     || 10 == counter || 13 == counter
-                if (counter == 0 
+                //     // if (beatCounter == 1 || beatCounter == 4 || beatCounter == 7 
+                //     //     || 10 == beatCounter || 13 == beatCounter
+                if (beatCounter == 0 
                     ) {
                     bufIndex = 0;
                 }
-                console.log('counter: ', counter, ' ,bufIndex: ', bufIndex);
+                console.log('beatCounter: ', beatCounter, ' ,bufIndex: ', bufIndex);
 
-                ms.source = ms.audioContext.createBufferSource();
-                ms.source.buffer = ms.soundFiles.buffers[bufIndex];
-                ms.source.connect(ms.audioContext.destination);
-                ms.source.onended = schedule;
+                self.source = self.audioContext.createBufferSource();
+                self.source.buffer = self.soundFiles.buffers[bufIndex];
+                self.source.connect(self.audioContext.destination);
+                self.source.onended = schedule;
 
-                nextStart += (60 / ms.tempoBpm) * beatPattern[counter];
-                ms.source.start(nextStart);
+                nextStart += (60 / self.tempoBpm) * beatPattern[beatCounter];
+                self.source.start(nextStart);
 
                 // debugging.
                 let diff = new Date().getTime() - endtime;
                 endtime = new Date().getTime();
-                console.log('endtime: ', endtime, ', diff: ', diff);
+//                console.log('endtime: ', endtime, ', diff: ', diff);
             }
         }
         schedule();
@@ -141,17 +144,17 @@ export default class MetronomeCore {
     }
 }
 
-class SoundFiles {
+class AudioFiles {
     constructor(context, urlList) {
-        this.buffers = [];
         const self = this;
+        self.buffers = [];
 
         urlList.forEach((url, index) => {
             const xhr = new XMLHttpRequest();
             xhr.responseType = "arraybuffer";
             xhr.onload = () => context.decodeAudioData(xhr.response,
                 (buffer) => self.buffers[index] = buffer,
-                (error) => console.error('decodeAudioData error', error));
+                (error) => console.error('decode Audio Data error', error));
             xhr.open("GET", url);
             xhr.send();
         });

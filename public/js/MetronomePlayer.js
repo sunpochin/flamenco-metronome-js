@@ -15,13 +15,21 @@ export default class MetronomePlayer {
         visualSelect, startStopID) {
         // console.log('constructor: ' );
         self = this;
+        // mimicing private variables: https://stackoverflow.com/a/28165599/720276
+        let _datas = [];
+        self.setDatas = function(datas) { _datas = datas; }
+        self.getDatas = function() { return _datas; }
+        self.getDataByIdx = function(idx) { return _datas[idx]; }
+        self.insertDatas = function(idx, aCompas) { 
+            _datas.splice(idx, 0, aCompas); 
+        }
 
-        this.visualSettings = visualSettings;
-        this.soundIdx = soundIdx || 'soundSelect';
-        this.sounds = sounds;
-//        console.log('this.soundIdx: ', this.soundIdx);
-        this.visualSelect = visualSelect || 'visType';
-        this.startStopID = startStopID || 'metronome';
+        self.visualSettings = visualSettings;
+        self.soundIdx = soundIdx || 'soundSelect';
+        self.sounds = sounds;
+//        console.log('self.soundIdx: ', self.soundIdx);
+        self.visualSelect = visualSelect || 'visType';
+        self.startStopID = startStopID || 'metronome';
 
         const metroSoundListener = {
             setTempo: (t) => visualSettings.tempoBpm = t,
@@ -30,12 +38,11 @@ export default class MetronomePlayer {
         self.metroWorker = new MetronomeWorker(soundFiles, sounds, metroSoundListener);
         //gmetroWorker = new MetronomeWorker(soundFiles, sounds, metroSoundListener);
 
-        visualSettings.getTime = () => this.metroWorker.audioContext.currentTime;
+        visualSettings.getTime = () => self.metroWorker.audioContext.currentTime;
 
-        this.datas = [];
-        this.loadJson();
+        self.loadJson();
 
-        const visTypeSelect = $('#' + this.visualSelect);
+        const visTypeSelect = $('#' + self.visualSelect);
         visTypeSelect.append('<option>None</option>');
         visualSettings.names.map((visTypeName, index) => {
             const sel = index === 0 ? ' selected' : '';
@@ -46,12 +53,52 @@ export default class MetronomePlayer {
         btnplaymetronome.addEventListener("click", function() {
             self.startStop();
         });
-
     }
 
     setAudioContext(audio) {
         self.metroWorker.setAudioContext(audio);
     }
+
+
+    // https://stackoverflow.com/questions/14643617/create-table-using-javascript
+    // https://www.valentinog.com/blog/html-table/
+    generateTableHead(table, data) {
+        let thead = table.createTHead();
+        let row = thead.insertRow();
+        let th = document.createElement("th");
+        let text = document.createTextNode('Here:');
+        th.appendChild(text);
+        row.appendChild(th);
+        for (let key of data) {
+            let th = document.createElement("th");
+            let text = document.createTextNode(key);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+    }
+    
+    generateTable(table, data) {
+        for (let element of data) {
+            let row = table.insertRow();
+            let cell = row.insertCell();
+            for (let key in element) {
+                let cell = row.insertCell();
+                let text = document.createTextNode(element[key]);
+                cell.appendChild(text);
+            }
+        }
+    }
+    
+    tableCreate() {
+        let table = document.querySelector("table");
+        let firstdata = self.getDataByIdx(0);
+        let data = Object.keys(firstdata);
+        console.log('firstdata: ', firstdata, ', data: ', data )
+
+        self.generateTableHead(table, data);
+        self.generateTable(table, self.getDatas() );
+    }
+
 
     SetupSelection() {
         // Setting up selection of HTML.
@@ -60,11 +107,11 @@ export default class MetronomePlayer {
         CompasPattern.append(`<option>AsPalo</option>`);
         CompasPattern.append(`<option>OnBeat</option>`);
 
-        console.log('cnt: ', this.datas.length)
-        for (let element of this.datas) {
-            const soundSelect = $('#' + this.soundIdx + element["no"]);
+        console.log('cnt: ', self.datas.length)
+        for (let element of self.datas) {
+            const soundSelect = $('#' + self.soundIdx + element["no"]);
             console.log('soundSelect: ', soundSelect);
-            for (const name of this.sounds) {
+            for (const name of self.sounds) {
                 const fileExtension = /\..*/;
                 const optionText = name.replace('_', ' ').replace(fileExtension, '');
                 console.log('optionText: ', optionText);
@@ -79,25 +126,21 @@ export default class MetronomePlayer {
             return fetch("res/compas-table.json")
             .then(response => response.json())
             .then(json => {
-                this.datas = json;
+                self.setDatas(json);
                 // console.log('json: ', json)
-                // console.log('this.datas: ', this.datas)
-//                this.tableCreate();
-
-                // this.addHeader();
-                // this.rowsCreate2(this.datas);
+                // console.log('self.datas: ', self.datas)
+                self.tableCreate();
             });
         }
         await getJson();
-
-        this.SetupSelection();
+        self.SetupSelection();
     }
     
     /**
      * @param bpm 
      */
     setTempo(bpm) {
-        this.metroWorker.setTempo(bpm);
+        self.metroWorker.setTempo(bpm);
     }
 
     /**
@@ -105,7 +148,7 @@ export default class MetronomePlayer {
      * @param palo 
      */
     setPalo(palo) {
-        this.metroWorker.setPalo(palo);
+        self.metroWorker.setPalo(palo);
     }
 
     /**
@@ -113,20 +156,20 @@ export default class MetronomePlayer {
      * @param number the one-based sound index
      */
     setSound(number) {
-        this.metroWorker.setSound(number);
+        self.metroWorker.setSound(number);
     }
 
     /**
      * @param index the visualization to use
      */
     setVisualization(index) {
-        this.visualSettings.visualizationType = index;
+        self.visualSettings.visualizationType = index;
     }
 
     // start of stop the beating.
     startStop() {
-        this.metroWorker.startStop();
-        $('#' + this.startStopID).val(this.metroWorker.running ? 'Stop' : 'Start')
+        self.metroWorker.startStop();
+        $('#' + self.startStopID).val(self.metroWorker.running ? 'Stop' : 'Start')
     }
 }
 

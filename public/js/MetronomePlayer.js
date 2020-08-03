@@ -93,11 +93,6 @@ export default class MetronomePlayer {
         this.SetupSelection();
     }
     
-    onclick(e) {
-        console.log('onclick! ', e);
-        alert(this.constructor.name); // SomeClass
-    }
-
     /**
      * @param bpm 
      */

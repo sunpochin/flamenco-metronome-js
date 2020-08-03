@@ -15,23 +15,25 @@ export default class MetronomeEditor {
         visTypeSelectId, startStopId) {
         // console.log('constructor: ' );
         self = this;
+        // mimicing private variables: https://stackoverflow.com/a/28165599/720276
+        let _datas = [];
+        self.setDatas = function(datas) { _datas = datas; }
+        self.getDatas = function() { return _datas; }
+        self.pushDatas = function(aCompas) { _datas.push(aCompas); }
 
-        this.visSettings = visSettings;
-        this.soundSelectId = soundSelectId || 'soundSelect';
+        self.visSettings = visSettings;
+        self.soundSelectId = soundSelectId || 'soundSelect';
 //        console.log('this.soundSelectId: ', this.soundSelectId);
-        this.visTypeSelectId = visTypeSelectId || 'visType';
-        this.startStopId = startStopId || 'metronome';
-
+        self.visTypeSelectId = visTypeSelectId || 'visType';
+        self.startStopId = startStopId || 'metronome';
         const metroSoundListener = {
             setTempo: (t) => visSettings.tempoBpm = t,
             setStartTime: (t) => visSettings.startTime = t
         };
         self.metroWorker = new MetronomeWorker(soundsPath, sounds, metroSoundListener);
 
-        visSettings.getTime = () => this.metroWorker.audioContext.currentTime;
-
-        this.datas = [];
-        this.loadJson();
+        visSettings.getTime = () => self.metroWorker.audioContext.currentTime;
+        self.loadJson();
     }
 
     setAudioContext(audio) {
@@ -177,15 +179,9 @@ export default class MetronomeEditor {
         });
 
         this.AddToRow(iEle, iRow);
-
         iCompasSheet.appendChild(iRow);
-
     }
     
-    onclick(e) {
-        console.log('onclick! ', e);
-        alert(this.constructor.name); // SomeClass
-    }
     //https://stackoverflow.com/questions/17001961/how-to-add-drop-down-list-select-programmatically
     //https://stackoverflow.com/questions/14643617/create-table-using-javascript
     rowsCreate2(data) {
@@ -194,7 +190,7 @@ export default class MetronomeEditor {
         // console.log("Palo_2: ", parent)
         var iCompasSheet = document.getElementById('compassheet');
         while (iCompasSheet && iCompasSheet.firstChild) {
-            console.log("parent.firstChild.remove(): " );
+//            console.log("parent.firstChild.remove(): " );
             iCompasSheet.firstChild.remove();
         }
 
@@ -212,7 +208,7 @@ export default class MetronomeEditor {
         // var iCompasSheet = document.createElement('div');
         var arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
         var arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
-        for (let element of data) {
+        for (let element of this.getDatas() ) {
 //            console.log('element: ', element);
             var iRow, iNo, iCol, iBtn;
             var colID = "", iSelect = "", option = "";
@@ -289,15 +285,17 @@ export default class MetronomeEditor {
             iRow.appendChild(iCol);
 
             // create + compas btn.
-            let rowID = "add_" + element["no"];
-            iCol = this.CreateAddCompasBtn(rowID);
+            let rowIdx = element["no"];
+            iBtn = this.CreateAddCompasBtn(rowIdx);
+            iCol.appendChild(iBtn);
             iRow.appendChild(iCol);
-            
             iCompasSheet.appendChild(iRow);
         }
     }
 
-    CreateAddCompasBtn(rowID) {
+    CreateAddCompasBtn(rowIdx) {
+        let rowID = "add_" + rowIdx;
+        console.log('rowID: ', rowID);
         let iBtn = document.createElement('button');
         iBtn.setAttribute("id", rowID);
         iBtn.className = "btn-info";
@@ -307,10 +305,8 @@ export default class MetronomeEditor {
         });
         let iCol = document.createElement('div');
         iCol.className = "col-md-2";
-        // console.log('colID: ', colID);
 //            iBtn.setAttribute("class", "form-control");
-        iCol.appendChild(iBtn);            
-        return iCol;
+        return iBtn;
     }
 
     /**
@@ -330,23 +326,21 @@ export default class MetronomeEditor {
     }
 
     addCompas(element) {
-        console.log('addCompas element: ', element);
+//        console.log('addCompas element: ', element);
         const toStr = (element.id).toString();
 
         const compasIdx = toStr.replace('add_', '');
         console.log('addCompas, compasNo: ', element.id, 
             ', toStr: ', toStr, ', compasIdx: ', compasIdx);
-
-        let ajson = {
-//            "no": "100", 
+        let aJson = {
             "CompasPattern": "Alegrias", 
             "Speed": 300, 
             "Speed Type": "Constant"
         };
-        ajson['no'] = compasIdx;
+        aJson['no'] = compasIdx;
     
-        this.datas.push(ajson);
-        this.rowsCreate2(this.datas);
+        this.pushDatas(aJson);
+        this.rowsCreate2(this.getDatas() );
     }
 
     /**
@@ -365,18 +359,5 @@ export default class MetronomeEditor {
         this.visSettings.visualizationType = index;
     }
 
-    /** Starts the metronome if it is stopped, and vice versa. */
-    toggle() {
-        this.metroWorker.toggle();
-        $('#' + this.startStopId).val(this.metroWorker.running ? 'Stop' : 'Start')
-    }
 }
 
-// const metronomeApp = new MetronomeEditor('res/audio/',
-//     [ 'Low_Bongo.wav', 'Clap_bright.wav',],
-//     VisSettings);
-
-// const metronomeApp = new MetronomeEditor('res/audio/',
-//     ['Clap_bright.wav', 'High_Woodblock.wav', 'Low_Woodblock.wav', 'High_Bongo.wav',
-//         'Low_Bongo.wav', 'Claves.wav', 'Drumsticks.wav'],
-//     VisSettings);

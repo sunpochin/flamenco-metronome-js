@@ -1,9 +1,12 @@
+# flamenco-metronome-js
+A Metronome for Flamenco musician and dancers, able to do Supida by a edited compas sheet.
+
 ## Start
-After git cloning, type `npm start`
+After git cloning, type `npm start` to start a local web.
 
 ## Spec
 
-### Attributes of a Compas:
+### Attributes of Palo:
 
 ### Attributes of a Compas:
 

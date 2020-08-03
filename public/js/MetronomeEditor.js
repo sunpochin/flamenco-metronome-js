@@ -209,12 +209,9 @@ export default class MetronomeEditor {
         }
 
         console.log("compassheet: ", iCompasSheet)
-
         // var iCompasSheet = document.createElement('div');
-
         var arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
         var arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
-
         for (let element of data) {
 //            console.log('element: ', element);
             var iRow, iNo, iCol, iBtn;
@@ -291,25 +288,29 @@ export default class MetronomeEditor {
             iCol.appendChild(iSelect);            
             iRow.appendChild(iCol);
 
-
-            iBtn = document.createElement('button');
-            colID = "add_" + element["no"];
-            iBtn.setAttribute("id", colID);
-            iBtn.className = "btn-info";
-            iBtn.textContent = "+ compas"
-            iBtn.addEventListener("click", function() {
-                self.addCompas(this);
-            });
-
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            // console.log('colID: ', colID);
-//            iBtn.setAttribute("class", "form-control");
-            iCol.appendChild(iBtn);            
+            // create + compas btn.
+            let rowID = "add_" + element["no"];
+            iCol = this.CreateAddCompasBtn(rowID);
             iRow.appendChild(iCol);
             
             iCompasSheet.appendChild(iRow);
         }
+    }
+
+    CreateAddCompasBtn(rowID) {
+        let iBtn = document.createElement('button');
+        iBtn.setAttribute("id", rowID);
+        iBtn.className = "btn-info";
+        iBtn.textContent = "+ compas"
+        iBtn.addEventListener("click", function() {
+            self.addCompas(this);
+        });
+        let iCol = document.createElement('div');
+        iCol.className = "col-md-2";
+        // console.log('colID: ', colID);
+//            iBtn.setAttribute("class", "form-control");
+        iCol.appendChild(iBtn);            
+        return iCol;
     }
 
     /**
@@ -329,9 +330,8 @@ export default class MetronomeEditor {
     }
 
     addCompas(element) {
+        console.log('addCompas element: ', element);
         const toStr = (element.id).toString();
-        // let num = ('abc').toString();
-        // alert(num.replace('a', 'b') );
 
         const compasIdx = toStr.replace('add_', '');
         console.log('addCompas, compasNo: ', element.id, 

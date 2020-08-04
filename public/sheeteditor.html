@@ -9,29 +9,30 @@
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
         crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="module" src="js/MetronomeWorker.js"></script>
+    <script src="js/visualization.js"></script>
+    <script type="module">
+        console.log('in html script tag');
+        import MetronomeEditor from './js/MetronomeEditor.js';
+        const metronomeEditor = new MetronomeEditor('res/audio/',
+            [ 'Low_Bongo.wav', 'Clap_bright.wav',],
+            VisSettings);
+        metronomeEditor.setAudioContext(new (window.AudioContext || window.webkitAudioContext)() );
+    </script>
+    <script type="module" src="js/MetronomeEditor.js"></script>
+        
 </head>
 
 <body>
 <div class="container">
     <h1>Editor Flamenco Metronome</h1>
+    <button class="btn btn-success">Load</button>
+    <button class="btn btn-warning">Save</button>
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-
-
-<script type="module" src="js/MetronomeWorker.js"></script>
-<script src="js/visualization.js"></script>
-<script type="module">
-    console.log('in html script tag');
-    import MetronomeEditor from './js/MetronomeEditor.js';
-    const metronomeEditor = new MetronomeEditor('res/audio/',
-        [ 'Low_Bongo.wav', 'Clap_bright.wav',],
-        VisSettings);
-    metronomeEditor.setAudioContext(new (window.AudioContext || window.webkitAudioContext)() );
-
-</script>
-<script type="module" src="js/MetronomeEditor.js"></script>
 
 </body>
 </html>

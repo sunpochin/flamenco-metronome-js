@@ -82,7 +82,7 @@ export default class MetronomeEditor {
 
 
     AddToRow(iEle, iRow) {
-        iEle.className = "badge badge-info";
+        iEle.className = "badge badge-danger";
         var iCol = document.createElement('div');
         iCol.className = "col-md-2";
         iCol.appendChild(iEle);
@@ -137,10 +137,10 @@ export default class MetronomeEditor {
         this.AddToRow(iEle, iRow);
 
         // add compas
-        iEle = document.createElement('span');
+        iEle = document.createElement('button');
         colID = "add_0" ;
         iEle.setAttribute("id", colID);
-        iEle.className = "badge badge-info";
+        iEle.className = "btn btn-info";
         iEle.textContent = "+"
         iEle.addEventListener("click", function() {
 //            console.log('event: this', this, ', gmetroWorker: ', gmetroWorker);

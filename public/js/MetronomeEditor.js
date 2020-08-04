@@ -1,10 +1,22 @@
+// import axios from 'axios';
 import MetronomeWorker from './MetronomeWorker.js';
 
-const SpeedType = 'subida';
+// const SpeedType = 'subida';
 
 let self = null;
 let arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
 let arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
+
+
+function download(content, fileName, contentType) {
+    var a = document.createElement("a");
+    var file = new Blob([content], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
+    
+
 export default class MetronomeEditor {
     /**
      * Creates a MetronomeEditor.
@@ -49,35 +61,37 @@ export default class MetronomeEditor {
     createButtons() {
         let mainCon, iBtn, iDiv;
 //        mainCon = document.getElementById('main-container');
-//        mainCon = document.getElementById('div1');
-        mainCon = document.body;
+        mainCon = document.getElementById('div1');
+//        mainCon = document.body;
 
-        iDiv = document.createElement('div');
-        iDiv.className = 'col-md-8'; 
+        // iDiv = document.createElement('div');
+        // iDiv.className = 'col-md-4'; 
 
-        iBtn = document.createElement("button");
-        iBtn.className = "btn btn-success";
-        iBtn.textContent = 'Load';
-        iBtn.id = 'btn-load';
-        mainCon.appendChild(iBtn);
+        // iBtn = document.createElement("button");
+        // iBtn.className = "btn btn-success";
+        // iBtn.textContent = 'Load';
+        // iBtn.id = 'btn-load';
+        // mainCon.appendChild(iBtn);
 
-//        mainCon.writeln();
-
-        iBtn = document.createElement("button");
-        iBtn.className = "btn btn-warning";
-        iBtn.textContent = 'Save';
-        iBtn.id = 'btn-save';
-        mainCon.appendChild(iBtn);
+        // iBtn = document.createElement("button");
+        // iBtn.className = "btn btn-warning";
+        // iBtn.textContent = 'Save';
+        // iBtn.id = 'btn-save';
+        // mainCon.appendChild(iBtn);
 //        mainCon.appendChild(iDiv);
 
         iBtn = document.getElementById('btn-load');
+        if (null == iBtn) {
+            console.log('iBtn null');
+            return;
+        }
         iBtn.addEventListener("click", function() {
             self.loadJson();
         });
 
         iBtn = document.getElementById('btn-save');
         iBtn.addEventListener("click", function() {
-            self.loadJson();
+            self.saveJson();
         });
 
     }
@@ -123,6 +137,24 @@ export default class MetronomeEditor {
         }
         await getJson();
         this.SetupSelection();
+    }
+
+    saveJson() {
+        const instance = axios.create({
+            baseURL: 'https://flamenco-metronome-js.firebaseio.com/'
+        });
+        instance.update('compas.json', self.getDatas());
+        
+
+        // let jsonData = JSON.stringify(self.getDatas());
+
+        // var blob = new Blob([jsonData], {type: "application/json"});
+
+        // var saveAs = window.saveAs;
+        // saveAs(blob, "my_outfile.json");
+
+        // console.log('jsonData: ', jsonData);
+        // download(jsonData, 'json.txt', 'text/plain');
     }
 
     // https://stackoverflow.com/questions/14643617/create-table-using-javascript

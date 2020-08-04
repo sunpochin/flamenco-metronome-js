@@ -5,6 +5,7 @@ import MetronomePlayer from '../public/js/MetronomePlayer';
 import MetronomeEditor from '../public/js/MetronomeEditor';
 import VisSettings from '../__mocks__/visualization';
 
+// https://dev.to/snowleo208/things-i-learned-after-writing-tests-for-js-and-html-page-4lja
 console.log('__dirname:', __dirname);
 let theName = path.resolve(__dirname, '../public/sheeteditor.html');
 // console.log('theName:', theName);

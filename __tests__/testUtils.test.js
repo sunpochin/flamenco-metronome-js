@@ -1,8 +1,27 @@
+const fs = require('fs');
+const path = require('path');
+
 import MetronomePlayer from '../public/js/MetronomePlayer';
 import MetronomeEditor from '../public/js/MetronomeEditor';
 import VisSettings from '../__mocks__/visualization';
 
+console.log('__dirname:', __dirname);
+let theName = path.resolve(__dirname, '../public/sheeteditor.html');
+// console.log('theName:', theName);
+
+const html = fs.readFileSync(theName,'utf-8');
+// console.log(', html: ', html);
+
 describe("Testing util function", () => {
+
+    beforeEach(() => {
+        document.documentElement.innerHTML = html.toString();
+    });
+    afterEach(() => {
+        // restore the original func after test
+        jest.resetModules();
+    });
+
     const theEditor = new MetronomeEditor('res/audio/',
         [ 'Low_Bongo.wav', 'Clap_bright.wav',],
         VisSettings);

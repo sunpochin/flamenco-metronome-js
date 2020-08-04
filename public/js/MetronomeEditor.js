@@ -40,7 +40,46 @@ export default class MetronomeEditor {
         self.metroWorker = new MetronomeWorker(soundsPath, sounds, metroSoundListener);
 
         visSettings.getTime = () => self.metroWorker.audioContext.currentTime;
+
+        self.createButtons();
+        
         self.loadJson();
+    }
+
+    createButtons() {
+        let mainCon, iBtn, iDiv;
+//        mainCon = document.getElementById('main-container');
+//        mainCon = document.getElementById('div1');
+        mainCon = document.body;
+
+        iDiv = document.createElement('div');
+        iDiv.className = 'col-md-8'; 
+
+        iBtn = document.createElement("button");
+        iBtn.className = "btn btn-success";
+        iBtn.textContent = 'Load';
+        iBtn.id = 'btn-load';
+        mainCon.appendChild(iBtn);
+
+//        mainCon.writeln();
+
+        iBtn = document.createElement("button");
+        iBtn.className = "btn btn-warning";
+        iBtn.textContent = 'Save';
+        iBtn.id = 'btn-save';
+        mainCon.appendChild(iBtn);
+//        mainCon.appendChild(iDiv);
+
+        iBtn = document.getElementById('btn-load');
+        iBtn.addEventListener("click", function() {
+            self.loadJson();
+        });
+
+        iBtn = document.getElementById('btn-save');
+        iBtn.addEventListener("click", function() {
+            self.loadJson();
+        });
+
     }
 
     setAudioContext(audio) {

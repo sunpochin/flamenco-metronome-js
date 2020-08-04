@@ -1,6 +1,9 @@
 import MetronomeWorker from './MetronomeWorker.js';
 
+
 let self = null;
+let arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
+let arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
 export default class MetronomeEditor {
     /**
      * Creates a MetronomeEditor.
@@ -50,8 +53,8 @@ export default class MetronomeEditor {
         CompasPattern.append(`<option>AsPalo</option>`);
         CompasPattern.append(`<option>OnBeat</option>`);
 
-        console.log('cnt: ', this._datas.length)
-        for (let element of this._datas) {
+        console.log('cnt: ', this.getDatas().length)
+        for (let element of this.getDatas() ) {
             const soundSelect = $('#' + this.soundSelectId + element["no"]);
             console.log('soundSelect: ', soundSelect);
             // for (const name of sounds) {
@@ -72,135 +75,69 @@ export default class MetronomeEditor {
                 self.setDatas(json);
                 // console.log('json: ', json)
                 // console.log('this.datas: ', this.datas)
-                this.addHeader();
-                this.rowsCreate2(self.getDatas() );
+                self.tableCreate(self.getDatas());
+
+                // self.addHeader();
+                self.CreateRow(self.getDatas() );
             });
         }
         await getJson();
         this.SetupSelection();
     }
 
+    // https://stackoverflow.com/questions/14643617/create-table-using-javascript
+    // https://www.valentinog.com/blog/html-table/
+    generateTableHead(table, data) {
+        let thead = table.createTHead();
+        let row = thead.insertRow();
+        let th = document.createElement("th");
+        let text = document.createTextNode('Here:');
+        th.appendChild(text);
+        row.appendChild(th);
+        for (let key of data) {
+            let th = document.createElement("th");
+            let text = document.createTextNode(key);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+        // th = document.createElement("th");
+        // text = document.createTextNode("+");
+        // th.appendChild(text);
+        // row.appendChild(th);
 
-    AddToRow(iEle, iRow) {
-        iEle.className = "badge badge-danger";
-        var iCol = document.createElement('div');
-        iCol.className = "col-md-2";
-        iCol.appendChild(iEle);
-        iRow.appendChild(iCol);
-    }
-
-    // adding the header
-    addHeader() {
-        // adding compas sheet
-        var myParent = document.body;
-        var iCompasSheet = document.createElement('div');
-        iCompasSheet.className="container";
-        iCompasSheet.id="compassheet-header"
-        myParent.appendChild(iCompasSheet);
-        
-        var iEle, iRow, iNo, iCol, iBtn;
-        var colID = "", iSelect = "", option = "";
-        // adding row.
-        iRow = document.createElement('div');
-        iRow.className = "row";
-
-        // compas no.
-        iEle = document.createElement('span');
-        colID = "no_0" ;
-        iEle.setAttribute("id", colID);
-        iEle.textContent = "Compas No. ";
-        iEle.addEventListener("change", function() {
-            self.setSound(this.selectedIndex + 1);
-        });
-//        iEle.setAttribute('style', 'height:40px; width:180px');
-        this.AddToRow(iEle, iRow);
-
-        // Palo
-        iEle = document.createElement('span');
-        colID = "add_0" ;
-        iEle.setAttribute("id", colID);
-        iEle.textContent = "Palo"
-        this.AddToRow(iEle, iRow);
-
-        // Speed
-        iEle = document.createElement('span');
-        colID = "speed_0" ;
-        iEle.setAttribute("id", colID);
-        iEle.textContent = "Speed"
-        this.AddToRow(iEle, iRow);
-
-        // Subida
-        iEle = document.createElement('span');
-        colID = "speedtype_0" ;
-        iEle.setAttribute("id", colID);
-        iEle.textContent = "Subida"
-        this.AddToRow(iEle, iRow);
-
-        // add compas
-        iEle = document.createElement('button');
-        colID = "add_0" ;
-        iEle.setAttribute("id", colID);
-        iEle.className = "btn btn-info";
-        iEle.textContent = "+"
-        iEle.addEventListener("click", function() {
-//            console.log('event: this', this, ', gmetroWorker: ', gmetroWorker);
+        var iBtn = document.createElement('button');
+        let colID = "add_" + 0;
+        iBtn.setAttribute("id", colID);
+        iBtn.className = "btn-info";
+        iBtn.textContent = "+ compas"
+        iBtn.addEventListener("click", function() {
             self.addCompas(this);
         });
+        let cell = row.insertCell();
+        cell.appendChild(iBtn);
 
-        this.AddToRow(iEle, iRow);
-        iCompasSheet.appendChild(iRow);
     }
     
-    //https://stackoverflow.com/questions/17001961/how-to-add-drop-down-list-select-programmatically
-    //https://stackoverflow.com/questions/14643617/create-table-using-javascript
-    rowsCreate2(data) {
-        // clear first.
-        // parent = document.getElementById('Palo_2');
-        // console.log("Palo_2: ", parent)
-        var iCompasSheet = document.getElementById('compassheet');
-        while (iCompasSheet && iCompasSheet.firstChild) {
-//            console.log("parent.firstChild.remove(): " );
-            iCompasSheet.firstChild.remove();
-        }
+    generateTable(table, data) {
+        for (let element of data) {
+            let row = table.insertRow();
+            let cell = row.insertCell();
 
-        if (null === iCompasSheet) {
-            console.log("iCompasSheet: ", iCompasSheet)
-
-            iCompasSheet = document.createElement('div');
-            iCompasSheet.className="container";
-            iCompasSheet.id="compassheet"
-            var myParent = document.body;
-            myParent.appendChild(iCompasSheet);
-        }
-
-        console.log("compassheet: ", iCompasSheet)
-        // var iCompasSheet = document.createElement('div');
-        var arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
-        var arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
-        for (let element of this.getDatas() ) {
-            console.log('element: ', element);
-            var iRow, iNo, iCol, iBtn;
-            var colID = "", iSelect = "", option = "";
-            // adding row.
-            iRow = document.createElement('div');
-            iRow.className = "row";
-
-            iNo = document.createElement('button');
+            let item = null, colID = null, iSelect = null, option = null;
+            
+            // adding No.
+            cell = row.insertCell();
+            item = document.createElement('button');
             colID = "no_" + element["no"];
-            // console.log('colID: ', colID);
-            iNo.setAttribute("id", colID);
-            iNo.className = "btn-info";
-            iNo.textContent = colID;
-            iNo.addEventListener("change", function() {
+            item.setAttribute("id", colID);
+            item.className = "btn btn-lg btn-primary disabled";
+            item.textContent = colID;
+            item.addEventListener("change", function() {
                 self.setSound(this.selectedIndex + 1);
             });
-                
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            iCol.appendChild(iNo);            
-            iRow.appendChild(iCol);
+            cell.appendChild(item);
 
-
+            // adding select.
             iSelect = document.createElement('select');
             colID = "Palo_" + element["no"];
             iSelect.setAttribute("id", colID);
@@ -214,55 +151,250 @@ export default class MetronomeEditor {
                 option.text = arrayPalo[i];
                 iSelect.appendChild(option);
             }
+            cell = row.insertCell();
+            cell.appendChild(iSelect);
 
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            // console.log('colID: ', colID);
-            iCol.setAttribute("id", colID);
-            iCol.appendChild(iSelect);            
-            iRow.appendChild(iCol);
-
-            
+            // Speed
             var iInput = document.createElement('input');
             colID = "Speed_" + element["no"];
             iInput.setAttribute("id", colID);
             iInput.setAttribute("type", "text");
             iInput.setAttribute("class", "form-control");
+            cell = row.insertCell();
+            cell.appendChild(iInput);
 
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            // console.log('colID: ', colID);
-            iCol.setAttribute("id", colID);
-            iCol.appendChild(iInput);            
-            iRow.appendChild(iCol);
-
-
+            // Subida
             iSelect = document.createElement('select');
-            // iSelect.setAttribute("id", rowID);
             colID = "soundSelect_" + element["no"];
             iSelect.setAttribute("id", colID);
             iSelect.setAttribute("class", "form-control-sm");
             iSelect.addEventListener("change", function() {
                 self.setSound(this.selectedIndex + 1);
             });
+            for (var i = 0; i < arrayPalo.length; i++) {
+                option = document.createElement("option");
+                option.value = arraySpeedType[i];
+                option.text = arraySpeedType[i];
+                iSelect.appendChild(option);
+            }
+            cell = row.insertCell();
+            cell.appendChild(iSelect);
 
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            // console.log('colID: ', colID);
-            iCol.setAttribute("id", colID);
-            iCol.appendChild(iSelect);            
-            iRow.appendChild(iCol);
-
-            // create + compas btn.
-            let rowIdx = element["no"];
-            iBtn = this.CreateAddCompasBtn(rowIdx);
-            iCol = document.createElement('div');
-            iCol.className = "col-md-2";
-            iCol.appendChild(iBtn);
-            iRow.appendChild(iCol);
-            iCompasSheet.appendChild(iRow);
+            var iBtn = document.createElement('button');
+            colID = "add_" + element["no"];
+            iBtn.setAttribute("id", colID);
+            iBtn.className = "btn-info";
+            iBtn.textContent = "+ compas"
+            iBtn.addEventListener("click", function() {
+                self.addCompas(this);
+            });
+            cell = row.insertCell();
+            cell.appendChild(iBtn);
         }
     }
+    
+    tableCreate(datas) {
+        // https://stackoverflow.com/questions/7271490/delete-all-rows-in-an-html-table
+        let table = document.getElementById("compas-table");
+        // var new_tbody = document.createElement('tbody');
+        // populate_with_new_rows(new_tbody);
+        // table.parentNode.replaceChild(new_tbody, old_tbody)
+
+        let firstdata = self.getDataByIdx(0);
+        let data = Object.keys(firstdata);
+        console.log('document: ', document, ', table: ', table, ', firstdata: ', firstdata, ', data: ', data )
+
+        self.generateTableHead(table, data);
+        self.generateTable(table, self.getDatas() );
+    }
+
+
+    AddToRow(iEle, iRow) {
+        iEle.className = "btn btn-primary btn-lg";
+        var iCol = document.createElement('div');
+        iCol.className = "col-md-2";
+        iCol.appendChild(iEle);
+        iRow.appendChild(iCol);
+    }
+
+//     // adding the header
+//     addHeader() {
+//         // adding compas sheet
+//         var myParent = document.body;
+//         var iCompasSheet = document.createElement('div');
+//         iCompasSheet.className="container";
+//         iCompasSheet.id="compassheet-header"
+//         myParent.appendChild(iCompasSheet);
+        
+//         var iEle, iRow, iNo, iCol, iBtn;
+//         var colID = "", iSelect = "", option = "";
+//         // adding row.
+//         iRow = document.createElement('div');
+//         iRow.className = "row";
+
+//         // compas no.
+//         iEle = document.createElement('span');
+//         colID = "no_0" ;
+//         iEle.setAttribute("id", colID);
+//         iEle.textContent = "Compas No. ";
+//         iEle.addEventListener("change", function() {
+//             self.setSound(this.selectedIndex + 1);
+//         });
+// //        iEle.setAttribute('style', 'height:40px; width:180px');
+//         this.AddToRow(iEle, iRow);
+
+//         // Palo
+//         iEle = document.createElement('span');
+//         colID = "add_0" ;
+//         iEle.setAttribute("id", colID);
+//         iEle.textContent = "Palo"
+//         this.AddToRow(iEle, iRow);
+
+//         // Speed
+//         iEle = document.createElement('span');
+//         colID = "speed_0" ;
+//         iEle.setAttribute("id", colID);
+//         iEle.textContent = "Speed"
+//         this.AddToRow(iEle, iRow);
+
+//         // Subida
+//         iEle = document.createElement('span');
+//         colID = "speedtype_0" ;
+//         iEle.setAttribute("id", colID);
+//         iEle.textContent = "Subida"
+//         this.AddToRow(iEle, iRow);
+
+//         // add compas
+//         iEle = document.createElement('button');
+//         colID = "add_0" ;
+//         iEle.setAttribute("id", colID);
+//         iEle.className = "btn btn-info";
+//         iEle.textContent = "+"
+//         iEle.addEventListener("click", function() {
+// //            console.log('event: this', this, ', gmetroWorker: ', gmetroWorker);
+//             self.addCompas(this);
+//         });
+
+//         this.AddToRow(iEle, iRow);
+//         iCompasSheet.appendChild(iRow);
+//     }
+    //https://stackoverflow.com/questions/17001961/how-to-add-drop-down-list-select-programmatically
+    //https://stackoverflow.com/questions/14643617/create-table-using-javascript
+    CreateRow(data) {
+    }
+    
+//     //https://stackoverflow.com/questions/17001961/how-to-add-drop-down-list-select-programmatically
+//     //https://stackoverflow.com/questions/14643617/create-table-using-javascript
+//     rowsCreate2(data) {
+//         // clear first.
+//         // parent = document.getElementById('Palo_2');
+//         // console.log("Palo_2: ", parent)
+//         var iCompasSheet = document.getElementById('compassheet');
+//         while (iCompasSheet && iCompasSheet.firstChild) {
+// //            console.log("parent.firstChild.remove(): " );
+//             iCompasSheet.firstChild.remove();
+//         }
+
+//         if (null === iCompasSheet) {
+//             console.log("iCompasSheet: ", iCompasSheet)
+
+//             iCompasSheet = document.createElement('div');
+//             iCompasSheet.className="container";
+//             iCompasSheet.id="compassheet"
+//             var myParent = document.body;
+//             myParent.appendChild(iCompasSheet);
+//         }
+
+//         console.log("compassheet: ", iCompasSheet)
+//         // var iCompasSheet = document.createElement('div');
+//         var arrayPalo = ["Alegrias", "Tangos", "Soleares", "Bulerias"];
+//         var arraySpeedType = ["Constant", "Inc. by Beat", "Inc. by Compas", "Dec. by Beat", "Dec. by Compas"];
+//         for (let element of this.getDatas() ) {
+//             console.log('element: ', element);
+//             var iRow, iNo, iCol, iBtn;
+//             var colID = "", iSelect = "", option = "";
+//             // adding row.
+//             iRow = document.createElement('div');
+//             iRow.className = "row";
+
+//             iNo = document.createElement('button');
+//             colID = "no_" + element["no"];
+//             // console.log('colID: ', colID);
+//             iNo.setAttribute("id", colID);
+//             iNo.className = "btn-info";
+//             iNo.textContent = colID;
+//             iNo.addEventListener("change", function() {
+//                 self.setSound(this.selectedIndex + 1);
+//             });
+                
+//             iCol = document.createElement('div');
+//             iCol.className = "col-md-2";
+//             iCol.appendChild(iNo);            
+//             iRow.appendChild(iCol);
+
+
+//             iSelect = document.createElement('select');
+//             colID = "Palo_" + element["no"];
+//             iSelect.setAttribute("id", colID);
+//             iSelect.setAttribute("class", "form-control-sm");
+//             iSelect.addEventListener("change", function() {
+//                 self.setSound(this.selectedIndex + 1);
+//             });
+//             for (var i = 0; i < arrayPalo.length; i++) {
+//                 option = document.createElement("option");
+//                 option.value = arrayPalo[i];
+//                 option.text = arrayPalo[i];
+//                 iSelect.appendChild(option);
+//             }
+
+//             iCol = document.createElement('div');
+//             iCol.className = "col-md-2";
+//             // console.log('colID: ', colID);
+//             iCol.setAttribute("id", colID);
+//             iCol.appendChild(iSelect);            
+//             iRow.appendChild(iCol);
+
+            
+//             var iInput = document.createElement('input');
+//             colID = "Speed_" + element["no"];
+//             iInput.setAttribute("id", colID);
+//             iInput.setAttribute("type", "text");
+//             iInput.setAttribute("class", "form-control");
+
+//             iCol = document.createElement('div');
+//             iCol.className = "col-md-2";
+//             // console.log('colID: ', colID);
+//             iCol.setAttribute("id", colID);
+//             iCol.appendChild(iInput);            
+//             iRow.appendChild(iCol);
+
+
+//             iSelect = document.createElement('select');
+//             // iSelect.setAttribute("id", rowID);
+//             colID = "soundSelect_" + element["no"];
+//             iSelect.setAttribute("id", colID);
+//             iSelect.setAttribute("class", "form-control-sm");
+//             iSelect.addEventListener("change", function() {
+//                 self.setSound(this.selectedIndex + 1);
+//             });
+
+//             iCol = document.createElement('div');
+//             iCol.className = "col-md-2";
+//             // console.log('colID: ', colID);
+//             iCol.setAttribute("id", colID);
+//             iCol.appendChild(iSelect);            
+//             iRow.appendChild(iCol);
+
+//             // create + compas btn.
+//             let rowIdx = element["no"];
+//             iBtn = this.CreateAddCompasBtn(rowIdx);
+//             iCol = document.createElement('div');
+//             iCol.className = "col-md-2";
+//             iCol.appendChild(iBtn);
+//             iRow.appendChild(iCol);
+//             iCompasSheet.appendChild(iRow);
+//         }
+//     }
 
     CreateAddCompasBtn(rowIdx) {
         let rowID = "add_" + rowIdx;
@@ -315,7 +447,7 @@ export default class MetronomeEditor {
             let oldNo = parseInt(self.getDataByIdx(idx)['no'], 10);
             self.getDataByIdx(idx)['no'] = oldNo + 1;
         }
-        self.rowsCreate2(this.getDatas() );
+        self.tableCreate(self.getDatas() );
     }
 
     /**

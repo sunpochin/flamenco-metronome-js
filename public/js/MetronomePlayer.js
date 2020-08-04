@@ -59,7 +59,7 @@ export default class MetronomePlayer {
         self.metroWorker.setAudioContext(audio);
     }
 
-
+    // duplicated
     // https://stackoverflow.com/questions/14643617/create-table-using-javascript
     // https://www.valentinog.com/blog/html-table/
     generateTableHead(table, data) {
@@ -83,14 +83,16 @@ export default class MetronomePlayer {
             let cell = row.insertCell();
             for (let key in element) {
                 let cell = row.insertCell();
+
                 let text = document.createTextNode(element[key]);
+                
                 cell.appendChild(text);
             }
         }
     }
     
     tableCreate() {
-        let table = document.querySelector("table");
+        let table = document.getElementById("compas-table");
         let firstdata = self.getDataByIdx(0);
         let data = Object.keys(firstdata);
         console.log('firstdata: ', firstdata, ', data: ', data )

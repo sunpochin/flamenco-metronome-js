@@ -1,6 +1,6 @@
 // import axios from 'axios';
 import MetronomeWorker from './MetronomeWorker.js';
-
+import {postCompas, getCompas} from './server-api.js';
 // const SpeedType = 'subida';
 
 let self = null;
@@ -141,17 +141,18 @@ export default class MetronomeEditor {
         }
     }
 
-    async loadJson() {
+    async localJson() {
         const getJson = async () => {
             return fetch("res/compas-table.json")
             .then(response => response.json())
             .then(json => {
+                console.log('local json');
+
                 self.setDatas(json);
                 self.metroWorker.setCompasTable(json);
-
-                // console.log('json: ', json)
+                self.tableCreate();
+                console.log('json: ', json)
                 // console.log('this.datas: ', this.datas)
-                self.tableCreate(self.getDatas());
 
                 // self.addHeader();
                 // self.CreateRow(self.getDatas() );
@@ -161,11 +162,31 @@ export default class MetronomeEditor {
         this.SetupSelection();
     }
 
+    loadJson() {
+        getCompas()
+            .then(response => response)
+            .then(response => {
+                console.log('from server: ', (response.data), 
+                    ', json.length: ', response.data.length );
+
+                if (response.data.length > 0) {
+                    // let json = JSON.stringify(res.data);
+                    // console.log('from server, ', json);
+        
+                    self.setDatas(response.data);
+                    self.metroWorker.setCompasTable(response.data);
+                    self.tableCreate();
+                    return;
+                } else {
+                    // go on load from local.
+                    self.localJson();
+                }
+            });
+    }
+
     saveJson() {
-        const instance = axios.create({
-            baseURL: 'https://flamenco-metronome-js.firebaseio.com/'
-        });
-        instance.update('compas.json', self.getDatas());
+        postCompas(self.getDatas());
+
         // let jsonData = JSON.stringify(self.getDatas());
         // var blob = new Blob([jsonData], {type: "application/json"});
         // var saveAs = window.saveAs;
@@ -291,7 +312,7 @@ export default class MetronomeEditor {
         }
     }
     
-    tableCreate(datas) {
+    tableCreate() {
         // https://stackoverflow.com/questions/7271490/delete-all-rows-in-an-html-table
         let table = document.getElementById("compas-table");
         // delete rows.
@@ -380,7 +401,7 @@ export default class MetronomeEditor {
             let oldNo = parseInt(self.getDataByIdx(idx)['no'], 10);
             self.getDataByIdx(idx)['no'] = oldNo + 1;
         }
-        self.tableCreate(self.getDatas() );
+        self.tableCreate();
     }
 
     /**

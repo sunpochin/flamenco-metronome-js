@@ -1,8 +1,10 @@
 
 let endtime = new Date().getTime();
+// let beatAlegriasTraditional = [1.5, 0.5, 1, 1.5, 0.5, 1,
+//     1.0, 0.5, 0.5, 1.0, 0.5, 0.5, 1.0, 1.0 ];
 let beatAlegriasTraditional = [1.5, 0.5, 1, 1.5, 0.5, 1,
     1.0, 0.5, 0.5, 1.0, 0.5, 0.5, 1.0, 1.0 ];
-// let beatAlegriasTraditional = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+// let beatAlegriasTraditional = [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 //         1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     
 let beatTangos = [0, 1.0, 0.5, 0.5, 1.0, 1.0];
@@ -51,7 +53,7 @@ export default class MetronomeCore {
     updateCompasIndicator() {
         let compasTable = document.getElementById('compas-table');
         console.log('updateCompasIndicator: ', this.compasNo, ', compasTable: ', compasTable);
-        let cell = compasTable.rows[this.compasNo].cells[0];
+        let cell = compasTable.rows[self.compasNo + 1].cells[0];
         cell.innerHTML = "==>";
     }
 
@@ -67,11 +69,13 @@ export default class MetronomeCore {
 
         // An array to represent the beating pattern of different palos.
         var beatPattern = beatAlegriasTraditional;
-
         let nextStart = self.audioContext.currentTime;
         function schedule() {
+            // update the indicator when start beating.
+            self.updateCompasIndicator();
+
             const speed = self.compasJson[self.compasNo]['Speed'];
-            console.log('typeof', typeof(self.compasNo), ' ,compas no: ', self.compasNo, ', speed: ', speed);
+            // console.log('typeof', typeof(self.compasNo), ' ,compas no: ', self.compasNo, ', speed: ', speed);
             // console.log('speed: ', speed)
             if (undefined !== speed ) {
                 // change speed only when it's a valid Map.get() result.
@@ -84,36 +88,39 @@ export default class MetronomeCore {
 
             self.listener.setStartTime(nextStart);
             self.listener.setTempo(self.tempoBpm);
-            let bufIndex = 1; // non-heavy beat sound.
-            if (bufIndex >= self.soundFiles.buffers.length) {
+            let soundIdx = 1; // non-heavy beat sound.
+            if (soundIdx >= self.soundFiles.buffers.length) {
                 alert('Sound files are not yet loaded')
             } else if (self.tempoBpm) {
-                beatCounter++;
-                // change compas
-                if (beatPattern.length == beatCounter) {
-                    beatCounter = beatCounter % beatPattern.length;
-                    self.compasNo += 1;
-                    self.updateCompasIndicator();
+                console.log('beatCounter: ', beatCounter, 
+                    ' ,soundIdx: ', soundIdx);
+                if (beatCounter == 0 ) {
+                    soundIdx = 0;
                 }
+
                 // if (beatCounter == 2 || beatCounter == 5 || beatCounter == 8 
                 //     || 11 == beatCounter || 14 == beatCounter
                 //     // || 0 == beatCounter
                 // //     ) {
                 //     // if (beatCounter == 1 || beatCounter == 4 || beatCounter == 7 
                 //     //     || 10 == beatCounter || 13 == beatCounter
-                if (beatCounter == 0 
-                    ) {
-                    bufIndex = 0;
-                }
-                console.log('beatCounter: ', beatCounter, ' ,bufIndex: ', bufIndex);
 
                 self.source = self.audioContext.createBufferSource();
-                self.source.buffer = self.soundFiles.buffers[bufIndex];
+                self.source.buffer = self.soundFiles.buffers[soundIdx];
                 self.source.connect(self.audioContext.destination);
                 self.source.onended = schedule;
-
-                nextStart += (60 / self.tempoBpm) * beatPattern[beatCounter];
+                // start play a sound now
                 self.source.start(nextStart);
+                // then plan next sound time.
+                nextStart += (60 / self.tempoBpm) * beatPattern[beatCounter];
+
+                beatCounter++;
+                // change compas
+                if (beatPattern.length == beatCounter) {
+                    beatCounter = beatCounter % beatPattern.length;
+                    self.compasNo += 1;
+                    console.log('beatCounter: ', beatCounter, ', self.compasNo:', self.compasNo);
+                }
 
                 // debugging.
                 let diff = new Date().getTime() - endtime;

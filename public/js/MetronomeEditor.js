@@ -15,7 +15,16 @@ function download(content, fileName, contentType) {
     a.download = fileName;
     a.click();
 }
-    
+
+function inputClickHandler(e) {
+    e = e || window.event;
+    var tdElm = e.target || e.srcElement;
+    if(tdElm.style.backgroundColor == 'rgb(255, 0, 0)'){
+        tdElm.style.backgroundColor = '#fff';
+    } else {
+        tdElm.style.backgroundColor = '#f00';
+    }
+}
 
 export default class MetronomeEditor {
     /**
@@ -54,8 +63,19 @@ export default class MetronomeEditor {
         visSettings.getTime = () => self.metroWorker.audioContext.currentTime;
 
         self.createButtons();
-        
         self.loadJson();
+
+        var btnplaymetronome = document.getElementById('playmetronome');
+        btnplaymetronome.addEventListener("click", function() {
+            self.startStop();
+        });
+        
+    }
+
+    // start of stop the beating.
+    startStop() {
+        self.metroWorker.startStop();
+        $('#' + self.startStopID).val(self.metroWorker.running ? 'Stop' : 'Start')
     }
 
     createButtons() {
@@ -103,9 +123,9 @@ export default class MetronomeEditor {
     SetupSelection() {
         // Setting up selection of HTML.
         // CompasPattern: AsPalo, OnBeat.
-        const CompasPattern = $('#' + 'CompasPattern');
-        CompasPattern.append(`<option>AsPalo</option>`);
-        CompasPattern.append(`<option>OnBeat</option>`);
+        const Palo = $('#' + 'Palo');
+        Palo.append(`<option>AsPalo</option>`);
+        Palo.append(`<option>OnBeat</option>`);
 
         console.log('cnt: ', this.getDatas().length)
         for (let element of this.getDatas() ) {
@@ -127,6 +147,8 @@ export default class MetronomeEditor {
             .then(response => response.json())
             .then(json => {
                 self.setDatas(json);
+                self.metroWorker.setCompasTable(json);
+
                 // console.log('json: ', json)
                 // console.log('this.datas: ', this.datas)
                 self.tableCreate(self.getDatas());
@@ -144,15 +166,10 @@ export default class MetronomeEditor {
             baseURL: 'https://flamenco-metronome-js.firebaseio.com/'
         });
         instance.update('compas.json', self.getDatas());
-        
-
         // let jsonData = JSON.stringify(self.getDatas());
-
         // var blob = new Blob([jsonData], {type: "application/json"});
-
         // var saveAs = window.saveAs;
         // saveAs(blob, "my_outfile.json");
-
         // console.log('jsonData: ', jsonData);
         // download(jsonData, 'json.txt', 'text/plain');
     }
@@ -196,13 +213,13 @@ export default class MetronomeEditor {
         if (null == table) {
             return;
         }
+        let tbody = document.createElement('tbody');
+        table.appendChild(tbody);
 
         for (let element of data) {
-            let row = table.insertRow();
+            let row = tbody.insertRow();
             let cell = row.insertCell();
-
             let item = null, colID = null, iSelect = null, option = null;
-            
             // adding No.
             cell = row.insertCell();
             item = document.createElement('button');
@@ -235,9 +252,12 @@ export default class MetronomeEditor {
             // Speed
             var iInput = document.createElement('input');
             colID = "Speed_" + element["no"];
+            iInput.value = element["Speed"];
             iInput.setAttribute("id", colID);
             iInput.setAttribute("type", "text");
-            iInput.setAttribute("class", "form-control");
+            iInput.width = 1000;
+            iInput.height = 1000;
+//            iInput.setAttribute("class", "form-control");
             cell = row.insertCell();
             cell.appendChild(iInput);
 
@@ -289,6 +309,12 @@ export default class MetronomeEditor {
 
         self.generateTableHead(table, header);
         self.generateTable(table, self.getDatas() );
+
+
+        var all = document.getElementsByTagName("td");
+        for (var i=0;i<all.length;i++) {
+            all[i].onclick = inputClickHandler;       
+        }        
     }
 
 
@@ -341,9 +367,9 @@ export default class MetronomeEditor {
             ', toStr: ', toStr, ', compasIdx: ', compasIdx);
         let aJson = {
             'no': '0',
-            'CompasPattern': 'Alegrias',
+            'Palo': 'Alegrias',
             'Speed': 300, 
-            'Speed Type': 'Constant'
+            'SType': 'Constant'
         };
         aJson['no'] = compasIdx.toString() ;
     

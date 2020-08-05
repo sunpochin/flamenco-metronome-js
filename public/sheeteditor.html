@@ -12,7 +12,7 @@
 
     <script src="js/FileSaver.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="module" src="js/MetronomeWorker.js"></script>
     <script src="js/visualization.js"></script>
@@ -29,11 +29,17 @@
 </head>
 
 <body>
+
 <div class="container" id="main-container">
     <div class="container" id="div1">
         <h1>Editor Flamenco Metronome</h1>
+        <a href="./index.html" target="_blank" title="Index page">Index Page</a>
+        <br>
         <button class="btn btn-success" id="btn-load">Load</button>
         <button class="btn btn-warning" id="btn-save">Save</button>
+        <br>
+            <input id="playmetronome" class="form-control btn btn-secondary"
+                type="button" value="Play"/>
     </div>
 
     <table id="compas-table" class="table table-dark table-bordered">

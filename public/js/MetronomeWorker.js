@@ -1,24 +1,17 @@
 
 let endtime = new Date().getTime();
-// let beatAlegriasTraditional = [1.5, 0.5, 1, 1.5, 0.5, 1,
-//     1.0, 0.5, 0.5, 1.0, 0.5, 0.5, 1.0, 1.0 ];
-
-let beatAlegriasTraditional = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+let beatAlegriasTraditional = [1.5, 0.5, 1, 1.5, 0.5, 1,
+    1.0, 0.5, 0.5, 1.0, 0.5, 0.5, 1.0, 1.0 ];
+// let beatAlegriasTraditional = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+//         1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     
 let beatTangos = [0, 1.0, 0.5, 0.5, 1.0, 1.0];
-//let compasTempoPair = [(1, 140), (4, 180), (7, 140), (8, 70) ];
-var compasTempoMap = new Map([
-//    [1, 140], [2, 180], [7, 140], [8, 70]] );
-//    [1, 5140], [2, 5180], [7, 5140], [8, 570]] );
-    [1, 70], [5, 80], [7, 90], [11, 100],
-    [13, 120], [15, 120], [17, 120],
-    [29, 140], [30, 160], [31, 180], [32, 200],
-    [33, 200],
-] );
+
+let self = null;
 
 export default class MetronomeCore {
     constructor(soundsPath, sounds, listener) {
+        self = this;
         this.soundsPath = soundsPath;
         const dummyListener = { setTempo: (t) => {}, setStartTime: (t) => {} };
         this.listener = listener || dummyListener;
@@ -26,10 +19,7 @@ export default class MetronomeCore {
         this.tempoBpm = 140;
         this.soundNum = 1;
         this.sounds = sounds;
-        // this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        // const urls = sounds.map(name => this.soundsPath + name);
-        // this.soundFiles = new AudioFiles(this.audioContext, urls);
-        this.compasNo = 1;
+        this.compasNo = 0;
     }
 
     /**
@@ -65,6 +55,11 @@ export default class MetronomeCore {
         cell.innerHTML = "==>";
     }
 
+
+    setCompasTable(compasJson) {
+        self.compasJson = compasJson;
+    }
+
     playMetronome() {
         const self = this;
         let beatCounter = 0;    //
@@ -75,8 +70,8 @@ export default class MetronomeCore {
 
         let nextStart = self.audioContext.currentTime;
         function schedule() {
-            const speed = compasTempoMap.get( self.compasNo );
-            // console.log('typeof', typeof(self.compasNo), ' ,compas no: ', self.compasNo, ', speed: ', speed);
+            const speed = self.compasJson[self.compasNo]['Speed'];
+            console.log('typeof', typeof(self.compasNo), ' ,compas no: ', self.compasNo, ', speed: ', speed);
             // console.log('speed: ', speed)
             if (undefined !== speed ) {
                 // change speed only when it's a valid Map.get() result.
@@ -140,6 +135,7 @@ export default class MetronomeCore {
                 this.source.disconnect();
                 this.source = undefined;
             }
+            self.compasNo = 0;
         }
     }
 }
@@ -160,3 +156,13 @@ class AudioFiles {
         });
     }
 }
+
+//let compasTempoPair = [(1, 140), (4, 180), (7, 140), (8, 70) ];
+// var compasTempoMap = new Map([
+// //    [1, 140], [2, 180], [7, 140], [8, 70]] );
+// //    [1, 5140], [2, 5180], [7, 5140], [8, 570]] );
+//     [1, 70], [5, 80], [7, 90], [11, 100],
+//     [13, 120], [15, 120], [17, 120],
+//     [29, 140], [30, 160], [31, 180], [32, 200],
+//     [33, 200],
+// ] );
